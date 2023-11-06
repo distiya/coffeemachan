@@ -1,0 +1,37 @@
+server:
+  port: 6001
+spring:
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: http://localhost:8080/realms/coffeemachan
+#      client:
+#        provider:
+#          keycloak:
+#            issuer-uri: http://localhost:8080/realms/coffeemachan
+#            user-name-attribute: preferred_username
+#        registration:
+#          keycloak:
+#            client-id: ${KEYCLOAK_CLIENT_ID:coffeemachan-login-client}
+#            client-secret: ${KEYCLOAK_CLIENT_SECRET:w20KdQUGqMiV8KEyp4DsVP8OShasoDzz}
+#            authorization-grant-type: password
+#            scope: openid
+
+  # Database configuration
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:coffeemachan}
+    username: ${DB_USER:coffeemachandb_admin}
+    password: ${DB_PASSWORD:cY5fuyOPpkDSM2y}
+  # JPA configuration
+  jpa:
+  # PotGIS configuration
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        default_schema: ${DB_SCHEMA:coffeemachan_schema}
+    hibernate:
+      ddl-auto: update
+      show-sql: true
+      database: postgresql

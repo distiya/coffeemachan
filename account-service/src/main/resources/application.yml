@@ -1,0 +1,11 @@
+server:
+  port: 6000
+coffeemachan:
+  security-providers:
+    keycloak:
+      admin: ${KEYCLOAK_ADMIN}
+      admin_password: ${KEYCLOAK_ADMIN_PASSWORD}
+      connect_url: ${KEYCLOAK_CONNECT_URL}
+      realm: ${KEYCLOAK_REALM}
+      client_id: ${KEYCLOAK_CLIENT_ID}
+      client_secret: ${KEYCLOAK_CLIENT_SECRET}

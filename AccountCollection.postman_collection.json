@@ -1,0 +1,206 @@
+{
+	"info": {
+		"_postman_id": "f57f4628-fb3e-4f67-b250-38636c592f6b",
+		"name": "AccountCollection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "PersistCustomer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"Sam\",\r\n    \"lastName\": \"Fernando\",\r\n    \"address\": \"#07-12, BLK 213B, Hougang\",\r\n    \"contactNumber\": \"006584272451\",\r\n    \"email\": \"samfernado@gmail.com\",\r\n    \"userName\": \"sam\",\r\n    \"password\": \"pYnWIaPMywgo10C\",\r\n    \"emailVerified\": true,\r\n    \"enabled\": true,\r\n    \"attributes\" : {\r\n        \"loyaltyPoints\": \"0\"\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{account_service_base_url}}/customers",
+					"host": [
+						"{{account_service_base_url}}"
+					],
+					"path": [
+						"customers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateCustomerLoyaltyPoints",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userName\": \"sam\",\r\n    \"attributes\" : {\r\n        \"loyaltyPoints\": \"1\"\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{account_service_base_url}}/customers/loyalty-points",
+					"host": [
+						"{{account_service_base_url}}"
+					],
+					"path": [
+						"customers",
+						"loyalty-points"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PersistEmployee",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"Sathish\",\r\n    \"lastName\": \"Subramanium\",\r\n    \"address\": \"#111-57, BLK 151A, Hougang\",\r\n    \"contactNumber\": \"006574255221\",\r\n    \"email\": \"sathishsubramanium@cofeemachan.com\",\r\n    \"userName\": \"sathish.subramanium\",\r\n    \"password\": \"AhjRBCx2RIIrdPn\",\r\n    \"emailVerified\": true,\r\n    \"enabled\": true,\r\n    \"roles\": [\"ROLE_EMPLOYEE\",\"ROLE_ADMIN_EMPLOYEE\"]\r\n}"
+				},
+				"url": {
+					"raw": "{{account_service_base_url}}/employees",
+					"host": [
+						"{{account_service_base_url}}"
+					],
+					"path": [
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteAccount",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{account_service_base_url}}/accounts?userName=hansi",
+					"host": [
+						"{{account_service_base_url}}"
+					],
+					"path": [
+						"accounts"
+					],
+					"query": [
+						{
+							"key": "userName",
+							"value": "hansi"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LoginAccount",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userName\": \"john\",\r\n    \"password\": \"HG2pie9khjNxiho\"\r\n}"
+				},
+				"url": {
+					"raw": "{{account_service_base_url}}/accounts/login",
+					"host": [
+						"{{account_service_base_url}}"
+					],
+					"path": [
+						"accounts",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LogoutAccount",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userName\": \"john\"\r\n}"
+				},
+				"url": {
+					"raw": "{{account_service_base_url}}/accounts/logout",
+					"host": [
+						"{{account_service_base_url}}"
+					],
+					"path": [
+						"accounts",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "account_service_base_url",
+			"value": "http://localhost:6000"
+		}
+	]
+}

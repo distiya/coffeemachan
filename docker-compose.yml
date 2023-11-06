@@ -1,0 +1,50 @@
+services:
+  database-service:
+    image: postgis/postgis:16-3.4-alpine
+    environment:
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_NAME}"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./dbinit.sql:/docker-entrypoint-initdb.d/dbinit.sql
+  keycloak-service:
+    image: quay.io/keycloak/keycloak:22.0.5
+    environment:
+      KEYCLOAK_ADMIN: "${KEYCLOAK_ADMIN}"
+      KEYCLOAK_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
+      KC_DB: postgres
+      KC_DB_URL: "jdbc:postgresql://database-service:5432/${DB_NAME}"
+      KC_DB_USERNAME: "${DB_USER}"
+      KC_DB_PASSWORD: "${DB_PASSWORD}"
+      KC_DB_SCHEMA: keycloak_schema
+      KC_HOSTNAME_URL: "${KEYCLOAK_HOSTNAME_URL}"
+      KC_HOSTNAME_ADMIN_URL: "${KEYCLOAK_HOSTNAME_URL}"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database-service
+    volumes:
+      - ./config/:/opt/keycloak/data/import:ro
+    command: ["start-dev","--import-realm"]
+  account-service:
+    build:
+      context: .
+      args:
+        JAR_FILE: ./account-service/target/*.jar
+        EXPOSE_PORT: 6000
+    environment:
+      KEYCLOAK_ADMIN: "${KEYCLOAK_ADMIN}"
+      KEYCLOAK_ADMIN_PASSWORD: "${KEYCLOAK_ADMIN_PASSWORD}"
+      KEYCLOAK_CONNECT_URL: "${KEYCLOAK_CONNECT_URL}"
+      KEYCLOAK_REALM: "${KEYCLOAK_REALM}"
+      KEYCLOAK_CLIENT_ID: "${KEYCLOAK_CLIENT_ID}"
+      KEYCLOAK_CLIENT_SECRET: "${KEYCLOAK_CLIENT_SECRET}"
+    ports:
+      - "6000:6000"
+    depends_on:
+      - keycloak-service
+networks:
+  default:
+    name: coffeemachan-service-network
