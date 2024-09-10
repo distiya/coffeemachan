@@ -1,0 +1,102 @@
+dotnet add package Microsoft.AnalysisServices.AdomdClient.retail.amd64
+
+dotnet new console -n OLAPCubeMDX
+cd OLAPCubeMDX
+
+======================== Code Program.cs=============================================
+
+using System;
+using System.Data;
+using System.IO;
+using Microsoft.AnalysisServices.AdomdClient;  // AdomdClient for OLAP
+
+namespace OLAPCubeMDX
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Get the connection string, MDX query, and CSV file name from environment variables
+            string connectionString = Environment.GetEnvironmentVariable("OLAP_CONNECTION_STRING");
+            string mdxQuery = Environment.GetEnvironmentVariable("MDX_QUERY");
+            string outputCsvFile = Environment.GetEnvironmentVariable("CSV_FILE_NAME");
+
+            // Check if the environment variables are set
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                Console.WriteLine("Environment variable 'OLAP_CONNECTION_STRING' is not set.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(mdxQuery))
+            {
+                Console.WriteLine("Environment variable 'MDX_QUERY' is not set.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(outputCsvFile))
+            {
+                Console.WriteLine("Environment variable 'CSV_FILE_NAME' is not set.");
+                return;
+            }
+
+            try
+            {
+                // Establish a connection to the OLAP cube
+                using (AdomdConnection connection = new AdomdConnection(connectionString))
+                {
+                    connection.Open();
+                    Console.WriteLine("Connected to OLAP cube successfully.");
+
+                    // Execute the MDX query
+                    using (AdomdCommand command = new AdomdCommand(mdxQuery, connection))
+                    {
+                        using (AdomdDataReader reader = command.ExecuteReader())
+                        {
+                            // Create a CSV file to write the results
+                            using (StreamWriter csvFile = new StreamWriter(outputCsvFile))
+                            {
+                                // Write the column headers
+                                for (int i = 0; i < reader.FieldCount; i++)
+                                {
+                                    csvFile.Write(reader.GetName(i));
+                                    if (i < reader.FieldCount - 1)
+                                        csvFile.Write(",");  // Comma between columns
+                                }
+                                csvFile.WriteLine();
+
+                                // Write the data rows
+                                while (reader.Read())
+                                {
+                                    for (int i = 0; i < reader.FieldCount; i++)
+                                    {
+                                        csvFile.Write(reader[i].ToString());
+                                        if (i < reader.FieldCount - 1)
+                                            csvFile.Write(",");  // Comma between columns
+                                    }
+                                    csvFile.WriteLine();
+                                }
+                            }
+                        }
+                    }
+
+                    connection.Close();
+                    Console.WriteLine("Query results written to CSV file: " + outputCsvFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: " + ex.Message);
+            }
+        }
+    }
+}
+
+===================================================================================================================
+
+dotnet publish -c Release -r linux-x64 --self-contained
+
+Deploy the build artifact to linux host
+
+./OLAPCubeMDX
+
