@@ -98,5 +98,90 @@ dotnet publish -c Release -r linux-x64 --self-contained
 
 Deploy the build artifact to linux host
 
+=========================== Http Way ========================================================================
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OLAPCubeMDX
+{
+    class Program
+    {
+        static async Task Main(string[] args)
+        {
+            // Get the connection details, MDX query, and CSV file name from environment variables
+            string olapEndpoint = Environment.GetEnvironmentVariable("OLAP_ENDPOINT_URL");
+            string mdxQuery = Environment.GetEnvironmentVariable("MDX_QUERY");
+            string outputCsvFile = Environment.GetEnvironmentVariable("CSV_FILE_NAME");
+
+            // Check if the environment variables are set
+            if (string.IsNullOrEmpty(olapEndpoint))
+            {
+                Console.WriteLine("Environment variable 'OLAP_ENDPOINT_URL' is not set.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(mdxQuery))
+            {
+                Console.WriteLine("Environment variable 'MDX_QUERY' is not set.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(outputCsvFile))
+            {
+                Console.WriteLine("Environment variable 'CSV_FILE_NAME' is not set.");
+                return;
+            }
+
+            try
+            {
+                // Create XMLA query string
+                string xmlaQuery = $@"
+                    <Envelope xmlns=""http://schemas.xmlsoap.org/soap/envelope/"">
+                        <Body>
+                            <Execute xmlns=""urn:schemas-microsoft-com:xml-analysis"">
+                                <Command>
+                                    <Statement>{mdxQuery}</Statement>
+                                </Command>
+                                <Properties>
+                                    <PropertyList>
+                                        <Catalog>YourCatalog</Catalog>
+                                    </PropertyList>
+                                </Properties>
+                            </Execute>
+                        </Body>
+                    </Envelope>";
+
+                using (HttpClient client = new HttpClient())
+                {
+                    var content = new StringContent(xmlaQuery, Encoding.UTF8, "text/xml");
+
+                    // Send the request to the OLAP endpoint
+                    HttpResponseMessage response = await client.PostAsync(olapEndpoint, content);
+                    string result = await response.Content.ReadAsStringAsync();
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine("Successfully executed MDX query.");
+                        // Process the XMLA response and write it to a CSV file
+                        System.IO.File.WriteAllText(outputCsvFile, result);
+                        Console.WriteLine($"Query results written to {outputCsvFile}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to execute MDX query: " + response.ReasonPhrase);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: " + ex.Message);
+            }
+        }
+    }
+}
+========================================================================================================
+
 ./OLAPCubeMDX
 
