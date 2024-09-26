@@ -1,0 +1,63 @@
+version: 2
+
+plan:
+  project-key: NET
+  key: DOTNETECR
+  name: Build and Push .NET App with Multi-Stage Dockerfile to ECR
+
+stages:
+  - Stage: Build and Push
+    jobs:
+      - job: Build_and_Push_to_ECR
+        key: BLD1
+        tasks:
+          - checkout: "." # Checkout the repository
+
+          # Build the Docker image using the multi-stage Dockerfile
+          - script:
+              description: "Build Docker image with multi-stage Dockerfile"
+              interpreter: BINSH_OR_CMDEXE
+              scripts:
+                - |
+                  echo "Building Docker image using multi-stage Dockerfile..."
+                  docker build -t my-dotnet-app .
+
+          # Authenticate to AWS ECR using AWS CLI
+          - script:
+              description: "Login to AWS ECR"
+              interpreter: BINSH_OR_CMDEXE
+              scripts:
+                - |
+                  echo "Logging in to AWS ECR..."
+                  aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com
+
+          # Tag the Docker image for ECR
+          - script:
+              description: "Tag Docker image"
+              interpreter: BINSH_OR_CMDEXE
+              scripts:
+                - |
+                  echo "Tagging Docker image for ECR..."
+                  docker tag my-dotnet-app:latest <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/my-dotnet-app:latest
+
+          # Push the Docker image to ECR
+          - script:
+              description: "Push Docker image to ECR"
+              interpreter: BINSH_OR_CMDEXE
+              scripts:
+                - |
+                  echo "Pushing Docker image to ECR..."
+                  docker push <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/my-dotnet-app:latest
+
+          # Clean up the Docker images
+          - script:
+              description: "Clean up Docker"
+              interpreter: BINSH_OR_CMDEXE
+              scripts:
+                - |
+                  echo "Cleaning up Docker..."
+                  docker image prune -f
+
+        requirements:
+          - system.docker
+
