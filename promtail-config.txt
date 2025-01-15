@@ -1,0 +1,44 @@
+server:
+  http_listen_port: 9080  # Port for Promtail to serve its API
+
+positions:
+  filename: /var/log/positions.yaml  # File to track the last read positions of logs
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push  # URL of the Loki server
+
+scrape_configs:
+  - job_name: custom_logs  # Name of the job
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: custom_logs
+          host: "${HOSTNAME}"  # Add a static label for the host
+    pipeline_stages:
+      - regex:
+          # Extract the MDC tag `customTag` from the logs
+          expression: ".*customTag=([a-zA-Z0-9_]+).*"
+      - labels:
+          # Map the extracted value to a label in Loki
+          custom_mdc: 
+      - timestamp:
+          source: "ts"  # Optional: Extract a timestamp field from the log
+          format: "2006-01-02T15:04:05.000Z07:00"  # Adjust based on your log format
+      - output:
+          # Transform the log line if needed (optional)
+          format: json
+          fields:
+            - log
+            - level
+            - custom_mdc
+
+  - job_name: system_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system_logs
+          host: "${HOSTNAME}"
+
+
